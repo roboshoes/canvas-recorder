@@ -1,6 +1,6 @@
 {
   "name": "canvas-recorder",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Records canvas animations frame by frame and generates PNGs for every frame to download.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
