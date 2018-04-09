@@ -11,7 +11,20 @@ let isLooping = false;
 let zip: JSZip;
 let count = 0;
 
-export const settings = {
+
+export type DrawingFunction = ( context: CanvasRenderingContext2D, time: number ) => void;
+export type DrawOptions = Partial<Settings>;
+
+export interface Settings {
+    record: boolean;
+    clear: boolean;
+    size: [ number, number ];
+    frames: number,
+    onComplete: (blob: Blob) => void;
+    color: string;
+}
+
+const settings = {
     record: true,
     clear: false,
     size: [ 1024, 1024 ] as [ number, number ],
@@ -19,9 +32,6 @@ export const settings = {
     onComplete: download,
     color: "white"
 };
-
-export type DrawingFunction = ( context: CanvasRenderingContext2D, time: number ) => void;
-export type DrawOptions = Partial<typeof settings>;
 
 export function getCanvas(): HTMLCanvasElement {
     return canvas;
