@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc --p tsconfig.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsc --p tsconfig.json && browserify dist/tests/index.spec.js > dist/tests/bundle.js"
   },
   "keywords": [
     "canvas",
@@ -22,9 +22,14 @@
     "lodash": "^4.17.5"
   },
   "devDependencies": {
+    "@types/expect.js": "^0.3.29",
     "@types/file-saver": "^1.3.0",
     "@types/jszip": "^3.1.3",
     "@types/lodash": "^4.14.106",
+    "@types/mocha": "^5.0.0",
+    "browserify": "^16.1.1",
+    "expect.js": "^0.3.1",
+    "mocha": "^5.0.5",
     "typescript": "^2.8.1"
   }
 }
