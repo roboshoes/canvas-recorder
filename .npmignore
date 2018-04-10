@@ -1,0 +1,6 @@
+dist/tests
+tsconfig.json
+src
+tests
+karma.conf.json
+.gitignore
