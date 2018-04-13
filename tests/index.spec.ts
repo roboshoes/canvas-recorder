@@ -1,4 +1,7 @@
+import JSZip from "jszip";
+
 import { cleanup, draw, getCanvas, getContext, options, reset, start, stop } from "../src";
+import { base64ToImage } from "./helpers";
 
 describe( "canvas-recorder", () => {
 
@@ -161,6 +164,144 @@ describe( "canvas-recorder", () => {
                     stop();
                     done();
                 }
+            } );
+
+            start();
+        } );
+
+    } );
+
+    describe( "zip", () => {
+
+        beforeEach( () => {
+            reset();
+        } );
+
+        it( "should recieve a zip as blob", ( done: MochaDone ) => {
+            options( {
+                frames: 2,
+                onComplete: ( blob: Blob ) => {
+                    expect( blob instanceof Blob ).to.be( true );
+                    expect( blob.type ).to.be( "application/zip" );
+                    done();
+                },
+            } );
+
+            draw( ( context: CanvasRenderingContext2D ) => {
+                context.fillStyle = "black";
+                context.fillRect( 10, 10, 100, 100 );
+            } );
+
+            start();
+        } );
+
+        it( "should contain 3 images", ( done: MochaDone ) => {
+
+            function verify( blob: Blob ) {
+                JSZip.loadAsync( blob )
+                    .then( ( zip: JSZip ) => {
+                        let count = 0;
+
+                        zip.forEach( ( path: string ) => {
+                            expect( path ).to.be( `00000${ count++ }.png` );
+                        } );
+
+                        done();
+                    } );
+            }
+
+            options( {
+                frames: 3,
+                onComplete: verify,
+            } );
+
+            draw( ( context: CanvasRenderingContext2D ) => {
+                context.fillStyle = "black";
+                context.fillRect( 10, 10, 100, 100 );
+            } );
+
+            start();
+        } );
+
+        it( "should create images in the correct size", ( done: MochaDone ) => {
+            function verify( blob: Blob ) {
+                JSZip.loadAsync( blob )
+                    .then( ( zip: JSZip ) => zip.file( "000000.png" ).async( "base64" ) )
+                    .then( base64ToImage )
+                    .then( ( image: HTMLImageElement ) => {
+                        expect( image.width ).to.be( 3 );
+                        expect( image.height ).to.be( 5 );
+                        done();
+                    } );
+            }
+
+            options( {
+                size: [ 3, 5 ],
+                frames: 1,
+                onComplete: verify,
+            } );
+
+            draw( () => {} );
+
+            start();
+        } );
+
+        it( "should create uncompressed images", ( done: MochaDone ) => {
+
+            function verify( blob: Blob ) {
+                JSZip.loadAsync( blob )
+                    .then( ( zip: JSZip ) => {
+                        return Promise.all( [
+                            "000000.png",
+                            "000001.png",
+                            "000002.png",
+                            "000003.png",
+                        ].map( name => zip.file( name ).async( "base64" ) ) );
+                    } )
+                    .then( ( contents: string[] ) => {
+                        return Promise.all( contents.map( content => base64ToImage( content ) ) ) ;
+                    } )
+                    .then( ( images: HTMLImageElement[] ) => {
+                        images.forEach( ( image: HTMLImageElement, index: number ) => {
+                            const n = index + 1;
+                            const canvas = document.createElement( "canvas" );
+                            const context = canvas.getContext( "2d" )!;
+
+                            canvas.width = image.width;
+                            canvas.height = image.height;
+
+                            context.drawImage( image, 0, 0 );
+
+                            const data = context.getImageData( 0, 0, 4, 1 ).data;
+
+                            for ( let x = 0; x < 16; x += 4 ) {
+                                expect( data[ x ] ).to.be( 10 * n );
+                                expect( data[ x + 1 ] ).to.be( 20 * n );
+                                expect( data[ x + 2] ).to.be( 30 * n );
+                            }
+                        } );
+
+                        done();
+                    } );
+            }
+
+            options( {
+                size: [ 4, 1 ],
+                frames: 4,
+                onComplete: verify,
+            } );
+
+            let frame = 1;
+
+            draw( ( context: CanvasRenderingContext2D ) => {
+
+                for ( let x = 0; x < 4; x++ ) {
+                    context.fillStyle = `rgb( ${ 10 * frame }, ${ 20 * frame }, ${ 30 * frame } )`;
+                    context.fillRect( x, 0, 1, 1 );
+                }
+
+                frame++;
+
             } );
 
             start();
