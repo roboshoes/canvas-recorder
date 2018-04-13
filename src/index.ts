@@ -1,21 +1,6 @@
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
-import { assign, padStart } from "lodash";
-
-const canvas = document.createElement( "canvas" );
-const context = canvas.getContext( "2d" )!;
-
-let callback: DrawingFunction | undefined;
-let teardown: (() => void) | undefined;
-let startTime: number;
-let isLooping = false;
-let zip: JSZip;
-let count = 0;
-let raf: number;
-
-
-export type DrawingFunction = ( context: CanvasRenderingContext2D, time: number ) => void;
-export type DrawOptions = Partial<Settings>;
+import { assign, bindAll, padStart } from "lodash";
 
 export interface Settings {
     record: boolean;
@@ -27,129 +12,151 @@ export interface Settings {
     fps: number;
 }
 
-const settings: Settings = {
-    record: true,
-    clear: false,
-    size: [ 1024, 1024 ],
-    frames: -1,
-    onComplete: download,
-    color: "white",
-    fps: 60,
-};
+export type DrawingFunction = ( context: CanvasRenderingContext2D, time: number ) => void;
+export type DrawOptions = Partial<Settings>;
 
-export function reset() {
-    isLooping = false;
-    cancelAnimationFrame( raf );
+export class Recorder {
+    private canvas: HTMLCanvasElement;
+    private context: CanvasRenderingContext2D;
+    private callback?: DrawingFunction;
+    private teardown?: () => void;
+    private count = 0;
+    private startTime = 0;
+    private raf: number = 0;
+    private isLooping = false;
+    private zip?: JSZip;
 
-    settings.record = true;
-    settings.clear = false;
-    settings.size = [ 1024, 1024 ];
-    settings.frames = -1;
-    settings.onComplete = download;
-    settings.color = "white";
+    private readonly settings: Settings = {
+        record: true,
+        clear: false,
+        size: [ 1024, 1024 ],
+        frames: -1,
+        onComplete: download,
+        color: "white",
+        fps: 60,
+    };
 
-    callback = undefined;
-    teardown = undefined;
+    constructor() {
+        this.canvas = document.createElement( "canvas" );
+        this.context = this.canvas.getContext( "2d" )!;
 
-    setup();
-}
-
-export function getCanvas(): HTMLCanvasElement {
-    return canvas;
-}
-
-export function getContext(): CanvasRenderingContext2D {
-    return context;
-}
-
-export function draw( action: DrawingFunction ) {
-    callback = action;
-}
-
-export function cleanup( action: () => void ) {
-    teardown = action;
-}
-
-export function start() {
-    if (!callback) {
-        throw new Error( "A drawing routine has to be provided using `draw( ( context, delta ) => void )`." );
+        bindAll( this, [ "loop" ] );
     }
 
-    setup();
+    public options( opts: DrawOptions ) {
+        if ( this.isLooping ) {
+            throw new Error( "Options can not be set while animation is in progress." );
+        }
 
-    isLooping = true;
-    startTime = Date.now();
-
-    loop();
-}
-
-export function options( opts: DrawOptions ) {
-    if ( isLooping ) {
-        throw new Error( "Options can not be set while animation is in progress." );
+        assign( this.settings, opts );
+        this.setup();
     }
 
-    assign( settings, opts );
-    setup();
-}
+    public start() {
+        if (!this.callback) {
+            throw new Error( "A drawing routine has to be provided using `draw( ( context, delta ) => void )`." );
+        }
 
-export function stop() {
-    isLooping = false;
-    cancelAnimationFrame( raf );
+        this.setup();
 
-    if ( teardown ) teardown();
+        this.isLooping = true;
+        this.startTime = Date.now();
 
-    if ( settings.record && count > 0 ) {
-        zip.generateAsync( { type: "blob" } ).then( settings.onComplete );
+        this.loop();
+    }
+
+    public stop() {
+        this.isLooping = false;
+        cancelAnimationFrame( this.raf );
+
+        if ( this.teardown ) this.teardown();
+
+        if ( this.settings.record && this.zip && this.count > 0 ) {
+            this.zip.generateAsync( { type: "blob" } ).then( this.settings.onComplete );
+        }
+    }
+
+    public reset() {
+        this.isLooping = false;
+        cancelAnimationFrame( this.raf );
+
+        this.settings.record = true;
+        this.settings.clear = false;
+        this.settings.size = [ 1024, 1024 ];
+        this.settings.frames = -1;
+        this.settings.onComplete = download;
+        this.settings.color = "white";
+
+        this.callback = undefined;
+        this.teardown = undefined;
+
+        this.setup();
+    }
+
+    public draw( action: DrawingFunction ) {
+        this.callback = action;
+    }
+
+    public cleanup( action: () => void ) {
+        this.teardown = action;
+    }
+
+    public getCanvas(): HTMLCanvasElement {
+        return this.canvas;
+    }
+
+    public getContext(): CanvasRenderingContext2D {
+        return this.context;
+    }
+
+    private setup() {
+        this.canvas.width = this.settings.size[ 0 ];
+        this.canvas.height = this.settings.size[ 1 ];
+
+        this.context.fillStyle = this.settings.color;
+        this.context.fillRect( 0, 0, this.settings.size[ 0 ], this.settings.size[ 1 ] );
+
+        this.zip = new JSZip();
+        this.count = 0;
+    }
+
+    private loop() {
+        if ( !this.isLooping ) return;
+
+        const delta = this.settings.record ? this.count * ( 1000 / this.settings.fps ) : Date.now() - this.startTime;
+
+        if ( this.settings.clear ) {
+            this.context.fillStyle = this.settings.color;
+            this.context.fillRect( 0, 0, this.settings.size[ 0 ], this.settings.size[ 1 ] );
+        }
+
+        this.callback!( this.context, delta );
+        this.count++;
+
+        if ( this.settings.record ) {
+            record( this.canvas, this.count - 1, this.zip! ).then( () => {
+                if ( this.count >= this.settings.frames && this.settings.frames > 0 ) stop();
+                else if ( this.isLooping ) this.nextFrame();
+            } );
+        } else if ( this.settings.frames > 0 && this.count >= this.settings.frames ) {
+            stop();
+        } else {
+            this.nextFrame();
+        }
+    }
+
+    private nextFrame() {
+        cancelAnimationFrame( this.raf );
+        this.raf = requestAnimationFrame( this.loop );
     }
 }
 
-function setup() {
-    canvas.width = settings.size[ 0 ];
-    canvas.height = settings.size[ 1 ];
-
-    context.fillStyle = settings.color;
-    context.fillRect( 0, 0, settings.size[ 0 ], settings.size[ 1 ] );
-
-    zip = new JSZip();
-    count = 0;
-}
 
 function download( blob: Blob ) {
     saveAs( blob, "frames.zip" );
 }
 
-function loop() {
-    if ( !isLooping ) return;
-
-    const delta = settings.record ? count * ( 1000 / settings.fps ) : Date.now() - startTime;
-
-    if ( settings.clear ) {
-        context.fillStyle = settings.color;
-        context.fillRect( 0, 0, settings.size[ 0 ], settings.size[ 1 ] );
-    }
-
-    callback!( context, delta );
-
-    count++;
-
-    if ( settings.record ) {
-        record( count - 1 ).then( () => {
-            if ( count >= settings.frames && settings.frames > 0 ) stop();
-            else if ( isLooping ) nextFrame( loop );
-        } );
-    } else if ( settings.frames > 0 && count >= settings.frames ) {
-        stop();
-    } else {
-        nextFrame( loop );
-    }
-}
-
-function nextFrame( action: FrameRequestCallback ) {
-    cancelAnimationFrame( raf );
-    raf = requestAnimationFrame( action );
-}
-
-function record( frame: number ): Promise<void> {
+function record( canvas: HTMLCanvasElement, frame: number, zip: JSZip ): Promise<void> {
     return new Promise<void>( resolve => {
         canvas.toBlob( ( blob: Blob | null ) => {
 
@@ -160,3 +167,22 @@ function record( frame: number ): Promise<void> {
         }, "image/png" );
     } );
 }
+
+/**
+ * For ease of use we make a bound version of the recorder available.
+ */
+const recorder = new Recorder();
+
+bindAll( recorder, [ "getCanvas", "getContext", "options", "start", "stop", "cleanup", "reset", "draw" ] );
+
+const getCanvas = recorder.getCanvas;
+const getContext = recorder.getContext;
+const options = recorder.options;
+const start = recorder.start;
+const stop = recorder.stop;
+const cleanup = recorder.cleanup;
+const reset = recorder.reset;
+const draw = recorder.draw;
+
+export default recorder;
+export { getCanvas, getContext, options, start, stop, cleanup, reset, draw };
