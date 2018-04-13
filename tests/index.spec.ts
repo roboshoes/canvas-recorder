@@ -1,4 +1,4 @@
-import { getCanvas, getContext, options, reset, draw, start, stop, cleanup } from "../src/index";
+import { cleanup, draw, getCanvas, getContext, options, reset, start, stop } from "../src";
 
 describe( "canvas-recorder", () => {
 
@@ -8,6 +8,7 @@ describe( "canvas-recorder", () => {
 
     it( "should return a drawing context", () => {
         expect( getContext() instanceof CanvasRenderingContext2D ).to.be( true );
+        expect( getContext().canvas ).to.be( getCanvas() );
         expect( getCanvas().getContext( "2d" ) ).to.be( getContext() );
     } );
 
@@ -19,7 +20,7 @@ describe( "canvas-recorder", () => {
 
         it( "should set canvas to correct size", () => {
             options( {
-                size: [ 300, 500 ]
+                size: [ 300, 500 ],
             } );
 
             const canvas = getCanvas();
@@ -49,7 +50,7 @@ describe( "canvas-recorder", () => {
             start();
         } );
 
-        it( 'should clear the previous content', ( done: MochaDone ) => {
+        it( "should clear the previous content", ( done: MochaDone ) => {
 
             let count = 0;
 
@@ -134,7 +135,7 @@ describe( "canvas-recorder", () => {
 
         it( "should throw when changing options while animating", () => {
             options( {
-                record: false
+                record: false,
             } );
 
             draw( () => {} );
@@ -147,4 +148,4 @@ describe( "canvas-recorder", () => {
 
     } );
 
-} )
+} );

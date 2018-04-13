@@ -1,12 +1,12 @@
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
-import { padStart, assign } from "lodash";
+import { assign, padStart } from "lodash";
 
 const canvas = document.createElement( "canvas" );
 const context = canvas.getContext( "2d" )!;
 
 let callback: DrawingFunction | undefined;
-let teardown: Function | undefined;
+let teardown: (() => void) | undefined;
 let startTime: number;
 let isLooping = false;
 let zip: JSZip;
@@ -21,7 +21,7 @@ export interface Settings {
     record: boolean;
     clear: boolean;
     size: [ number, number ];
-    frames: number,
+    frames: number;
     onComplete: (blob: Blob) => void;
     color: string;
 }
@@ -32,7 +32,7 @@ const settings: Settings = {
     size: [ 1024, 1024 ] as [ number, number ],
     frames: -1,
     onComplete: download,
-    color: "white"
+    color: "white",
 };
 
 export function reset() {
@@ -70,7 +70,7 @@ export function cleanup( action: () => void ) {
 
 export function start() {
     if (!callback) {
-        throw new Error( 'A drawing routine has to be provided using `draw( ( context, delta ) => void )`.' );
+        throw new Error( "A drawing routine has to be provided using `draw( ( context, delta ) => void )`." );
     }
 
     setup();
@@ -142,19 +142,19 @@ function loop() {
     }
 }
 
-function nextFrame( callback: FrameRequestCallback ) {
+function nextFrame( action: FrameRequestCallback ) {
     cancelAnimationFrame( raf );
-    raf = requestAnimationFrame( callback );
+    raf = requestAnimationFrame( action );
 }
 
 function record( frame: number ): Promise<void> {
-    return new Promise( ( resolve: Function ) => {
+    return new Promise<void>( resolve => {
         canvas.toBlob( ( blob: Blob | null ) => {
 
-            const name = `${ padStart( frame.toString(), 6, '0' ) }.png`;
+            const name = `${ padStart( frame.toString(), 6, "0" ) }.png`;
             zip.file( name, blob!, { base64: true } );
             resolve();
 
-        }, 'image/png' );
+        }, "image/png" );
     } );
 }
