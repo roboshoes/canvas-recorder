@@ -146,6 +146,26 @@ describe( "canvas-recorder", () => {
             stop();
         } );
 
+        it ( "should fix delta time when recording", ( done: MochaDone ) => {
+            options( {
+                fps: 10,
+                onComplete: () => {},
+            } );
+
+            let count = 0;
+
+            draw( ( _ , delta: number ) => {
+                expect( delta ).to.be( count * 100 );
+
+                if ( ++count > 10 ) {
+                    stop();
+                    done();
+                }
+            } );
+
+            start();
+        } );
+
     } );
 
 } );

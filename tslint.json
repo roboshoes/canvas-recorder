@@ -15,6 +15,7 @@
         "no-empty-interface": true,
         "no-empty": false,
         "object-literal-sort-keys": false,
+        "no-unused-variable": false,
         "no-console": {
             "severity": "warning",
             "options": [

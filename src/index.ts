@@ -24,15 +24,17 @@ export interface Settings {
     frames: number;
     onComplete: (blob: Blob) => void;
     color: string;
+    fps: number;
 }
 
 const settings: Settings = {
     record: true,
     clear: false,
-    size: [ 1024, 1024 ] as [ number, number ],
+    size: [ 1024, 1024 ],
     frames: -1,
     onComplete: download,
     color: "white",
+    fps: 60,
 };
 
 export function reset() {
@@ -119,7 +121,7 @@ function download( blob: Blob ) {
 function loop() {
     if ( !isLooping ) return;
 
-    const delta = Date.now() - startTime;
+    const delta = settings.record ? count * ( 1000 / settings.fps ) : Date.now() - startTime;
 
     if ( settings.clear ) {
         context.fillStyle = settings.color;
