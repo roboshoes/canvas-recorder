@@ -43,8 +43,10 @@ It takes one argument which is an object with the following possible settings:
 - `onComplete`: [Default `<internal>`] Function that is called when all frames are recorded and archived into a zip in
                                        form of a `Blob`. When not set, a download is triggered automatically.
 - `color`: [Default: `"white"`] Sets the background color of every frame if `clear` is set to `true`.
+- `fps`: [Default: `60`] The framerate at from which the elapsed time is calculated in record mode. Not that the
+                         recording won't happen in at this pace as it is no longer realtime.
 
-### `draw( ( canvas, time ) => {} )`
+### `draw( ( context, time ) => {} )`
 The draw method is the heart of the recorder. It takes on argument which is a callback. This callback will recieve two
 arguments at every invocation:
 - `context` which is a `CanvasRenderingContext2D` associated with the Canvas. This context is generally used to draw
