@@ -18,9 +18,8 @@ export class Recorder extends BaseRecorder<CanvasRenderingContext2D> {
     }
 }
 
-/**
- * For ease of use we make a bound version of the recorder available.
- */
+
+// For ease of use we make a bound version of the recorder available.
 const recorder = new Recorder();
 
 bindAll( recorder, [ "getCanvas", "getContext", "options", "start", "stop", "cleanup", "reset", "draw" ] );

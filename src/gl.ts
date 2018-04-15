@@ -1,6 +1,8 @@
+import { bindAll } from "lodash";
+
 import { BaseRecorder, colorToRGBA, Settings } from "./shared";
 
-export class Recorder  extends BaseRecorder<WebGLRenderingContext> {
+export class Recorder extends BaseRecorder<WebGLRenderingContext> {
 
     get gl(): WebGLRenderingContext {
         return this.context;
@@ -24,3 +26,19 @@ export class Recorder  extends BaseRecorder<WebGLRenderingContext> {
         this.gl.clear( this.gl.COLOR_BUFFER_BIT );
     }
 }
+
+export const recorder = new Recorder();
+
+bindAll( recorder, [ "getCanvas", "getContext", "options", "start", "stop", "cleanup", "reset", "draw" ] );
+
+const getCanvas = recorder.getCanvas;
+const getContext = recorder.getContext;
+const options = recorder.options;
+const start = recorder.start;
+const stop = recorder.stop;
+const cleanup = recorder.cleanup;
+const reset = recorder.reset;
+const draw = recorder.draw;
+
+export default recorder;
+export { getCanvas, getContext, options, start, stop, cleanup, reset, draw };

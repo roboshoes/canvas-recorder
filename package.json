@@ -6,14 +6,15 @@
   "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "tsc --p tsconfig.json",
-    "test-files": "npm run build && browserify dist/tests/index.spec.js > dist/tests/bundle.js",
+    "test-files": "npm run build && browserify dist/tests/tests.js > dist/tests/bundle.js",
     "test": "npm run test-files && karma start karma.conf.js"
   },
   "keywords": [
+    "animation",
     "canvas",
     "record",
-    "animation",
-    "sequence"
+    "sequence",
+    "webgl"
   ],
   "author": "Mathias Paumgarten",
   "license": "MIT",

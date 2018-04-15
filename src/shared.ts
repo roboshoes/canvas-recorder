@@ -1,6 +1,9 @@
 import JSZip from "jszip";
 import { assign, bindAll, memoize, padStart } from "lodash";
 
+/**
+ * Complete set of options.
+ */
 export interface Settings {
     record: boolean;
     clear: boolean;
@@ -11,9 +14,15 @@ export interface Settings {
     fps: number;
 }
 
+/**
+ * Interface to descrbie the possible when set in an `options()` call.
+ */
 export type DrawOptions = Partial<Settings>;
 
-export class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingContext> {
+/**
+ * Abstract base class that implements shared internal functionality to record a canvas was animation frame by frame.
+ */
+export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingContext> {
     protected callback?: ( context: T, time: number ) => void;
     protected teardown?: () => void;
     protected count = 0;
@@ -22,6 +31,9 @@ export class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingCon
     protected isLooping = false;
     protected zip?: JSZip;
 
+    /**
+     * State of settings currently in use. For more detail please refer to the README.
+     */
     protected readonly settings: Settings = {
         record: true,
         clear: false,
@@ -36,6 +48,11 @@ export class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingCon
         bindAll( this, [ "loop" ] );
     }
 
+    /**
+     * Sets specific details on how the recorder functions.
+     *
+     * @param opts settings for recording behavior
+     */
     public options( opts: DrawOptions ) {
         if ( this.isLooping ) {
             throw new Error( "Options can not be set while animation is in progress." );
@@ -45,6 +62,12 @@ export class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingCon
         this.setup();
     }
 
+    /**
+     * Starts a recording. This will create an asyncronous loop that continously calls the draw function until the
+     * recorder is either manually stopped or automatically terminated after reaching and amount of desired frames.
+     *
+     * Once the recording was started, options can not be changed.
+     */
     public start() {
         if (!this.callback) {
             throw new Error( "A drawing routine has to be provided using `draw( ( context, delta ) => void )`." );
@@ -58,6 +81,13 @@ export class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingCon
         this.loop();
     }
 
+    /**
+     * Stops the recording process. When a desired amount of frames is set, this method is not needed as it is
+     * invoked internally.
+     * Stopping the recording also starts an asyncrounous routine to finalize the zip file that contains all images.
+     * Due to the inherent asyncrounous nature of the process, the stop function has no return value. To recieve the
+     * archive instead of downloading it, set the onComplete method in the option.
+     */
     public stop() {
         this.isLooping = false;
         cancelAnimationFrame( this.raf );
@@ -69,6 +99,10 @@ export class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingCon
         }
     }
 
+    /**
+     * Resets the recorder options to it's originaly state. Terminates any recording if in process. Disposes all
+     * currently recorded frames.
+     */
     public reset() {
         this.isLooping = false;
         cancelAnimationFrame( this.raf );
@@ -86,25 +120,42 @@ export class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingCon
         this.setup();
     }
 
+    /**
+     * Sets the callback used to capture a frame. Repeatedly setting callbacks will overwrite the previous one.
+     * Multiple callbacks can not be set. The callback given will recieve the context and the time passed since the
+     * start of the recording. Be advised that the time does not represent real time but is dependend on the desired
+     * amount of FPD set in the options.
+     *
+     * @param action callback to capture the animation.
+     */
     public draw( action: ( context: T, time: number ) => void ) {
         this.callback = action;
     }
 
+    /**
+     * Optinall callback after the animation has terminated. Use this if you need to run some cleanup code after all the
+     * animating is done.
+     * @param action callback
+     */
     public cleanup( action: () => void ) {
         this.teardown = action;
     }
 
+    /**
+     * Returns the canvas html element in use. Useful to inject it into the DOM when in development mode.
+     */
     public getCanvas(): HTMLCanvasElement {
         return this.canvas;
     }
 
+    /**
+     * Returns the context being used. The type depends on the non-abstract implementation of this class.
+     */
     public getContext(): T {
         return this.context;
     }
 
-    protected clear() {
-        throw new Error( "Method not implemented" );
-    }
+    protected abstract clear(): void;
 
     private setup() {
         this.canvas.width = this.settings.size[ 0 ];
@@ -119,7 +170,9 @@ export class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingCon
     private loop() {
         if ( !this.isLooping ) return;
 
-        const delta = this.settings.record ? this.count * ( 1000 / this.settings.fps ) : Date.now() - this.startTime;
+        const delta = this.settings.record ?
+            this.count * ( 1000 / this.settings.fps ) :
+            Date.now() - this.startTime;
 
         if ( this.settings.clear ) {
             this.clear();
@@ -161,6 +214,12 @@ const strictColorToRGBA = memoize( ( color: string ) => {
     return [ data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ] ];
 } );
 
+/**
+ * Helper that uses browser internal methods to convert CSS based color string into a RGBA number array.
+ * The array returned contains 4 numbers ranging from 0 to 1.
+ *
+ * @param color Variously formatted color string.
+ */
 export function colorToRGBA( color: string ): [ number, number, number, number ] {
     return strictColorToRGBA( color ) as [ number, number, number, number ];
 }
