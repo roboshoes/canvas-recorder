@@ -25,6 +25,7 @@ export type DrawOptions = Partial<Settings>;
 export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingContext> {
     protected callback?: ( context: T, time: number ) => void;
     protected teardown?: () => void;
+    protected before?: ( context: T ) => void;
     protected count = 0;
     protected startTime = 0;
     protected raf: number = 0;
@@ -59,7 +60,7 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
         }
 
         assign( this.settings, opts );
-        this.setup();
+        this.init();
     }
 
     /**
@@ -73,11 +74,12 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
             throw new Error( "A drawing routine has to be provided using `draw( ( context, delta ) => void )`." );
         }
 
-        this.setup();
+        this.init();
 
         this.isLooping = true;
         this.startTime = Date.now();
 
+        if ( this.before ) this.before( this.context );
         this.loop();
     }
 
@@ -116,8 +118,9 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
 
         this.callback = undefined;
         this.teardown = undefined;
+        this.before = undefined;
 
-        this.setup();
+        this.init();
     }
 
     /**
@@ -141,6 +144,10 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
         this.teardown = action;
     }
 
+    public setup( action: ( context: T ) => void ) {
+        this.before = action;
+    }
+
     /**
      * Returns the canvas html element in use. Useful to inject it into the DOM when in development mode.
      */
@@ -157,7 +164,7 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
 
     protected abstract clear(): void;
 
-    private setup() {
+    private init() {
         this.canvas.width = this.settings.size[ 0 ];
         this.canvas.height = this.settings.size[ 1 ];
 

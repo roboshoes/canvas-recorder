@@ -1,4 +1,9 @@
-import { cleanup, draw, getCanvas, getContext, options, reset, start, stop } from "../src/gl";
+import triangle from "a-big-triangle";
+import createShader from "gl-shader";
+import JSZip from "jszip";
+
+import { cleanup, draw, getCanvas, getContext, options, reset, setup, start, stop } from "../src/gl";
+import { base64ToImage, imageToCanvas } from "./helpers";
 
 export function specs() {
 
@@ -72,6 +77,97 @@ export function specs() {
             } );
 
         } );
+
+        describe( "zip", () => {
+
+            beforeEach( () => {
+                reset();
+            } );
+
+            it( "should recieve a zip as blob", ( done: MochaDone ) => {
+                options( {
+                    frames: 2,
+                    onComplete: ( blob: Blob ) => {
+                        expect( blob instanceof Blob ).to.be( true );
+                        expect( blob.type ).to.be( "application/zip" );
+                        done();
+                    },
+                } );
+
+                draw( ( gl: WebGLRenderingContext ) => {
+                    triangle( gl );
+                } );
+
+                start();
+            } );
+
+            it( "should create a red frame", ( done: MochaDone ) => {
+
+                let shader: { bind: () => void };
+
+                options( {
+                    frames: 1,
+                    size: [ 10, 10 ],
+                    onComplete: ( blob: Blob ) => {
+                        JSZip.loadAsync( blob )
+                            .then( ( zip: JSZip ) => zip.file( "000000.png" ).async( "base64" ) )
+                            .then( base64ToImage )
+                            .then( imageToCanvas )
+                            .then( ( canvas: HTMLCanvasElement ) => {
+                                expect( canvas.width ).to.be( 10 );
+                                expect( canvas.height ).to.be( 10 );
+
+                                const context = canvas.getContext( "2d" )!;
+                                const data = context.getImageData( 0, 0, 10, 10 ).data;
+
+                                for ( let i = 0; i < data.length; i += 4 ) {
+                                    expect( data[ i ] ).to.be( 255 );
+                                    expect( data[ i + 1 ] ).to.be( 0 );
+                                    expect( data[ i + 2 ] ).to.be( 0 );
+                                    expect( data[ i + 3 ] ).to.be( 255 );
+                                }
+
+                                done();
+                            } );
+                    },
+                } );
+
+                setup( ( gl: WebGLRenderingContext ) => {
+                    shader = createShader(
+                        gl,
+                        `
+                            precision mediump float;
+                            attribute vec2 position;
+
+                            varying vec2 uv;
+
+                            void main() {
+                                uv = position.xy;
+                                gl_Position = vec4( position.xy, 0.0, 1.0 );
+                            }
+                        `,
+                        `
+                            precision mediump float;
+                            varying vec2 uv;
+                            void main() {
+                                gl_FragColor = vec4( 1, 0, 0, 1 );
+                            }
+                        `,
+                    );
+                } );
+
+                draw( ( gl: WebGLRenderingContext ) => {
+
+                    shader.bind();
+
+                    triangle( gl );
+                } );
+
+                start();
+            } );
+
+        } );
+
     } );
 
 }
