@@ -1,6 +1,6 @@
 {
   "name": "canvas-recorder",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Browserside tool to record canvas animations frame by frame.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",

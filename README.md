@@ -63,6 +63,10 @@ Will terminate the loop. If the settings are set to `record: true`, calling `sto
 recorded frames and compress them in a ZIP archive. By default this ZIP will trigger a download to save all frames,
 unless `onComplete` is set with a costum function. If so, said function will recieve the ZIP in form of a `Blob`.
 
+### `setup( ( context ) => {} )`
+This method will be called right before the frist draw call. The context is passed. This is especially useful in the
+WebGL implementation.
+
 ### `cleanup( () => {} )`
 This is a utility that can be used as a callback after the recording has terminated. This is especially useful when the
 recorder is used in frame mode. After the desired amount of frames this method will be called. Once this method is
@@ -73,3 +77,57 @@ Returns the canvas being used by the recorder.
 
 ### `getContext(): CanvasRenderingContext2D`
 Returns the context attached to the canvas of the recorder.
+
+## WebGL
+
+The package is also avialble with webgl support. The API is quasi identical. In order to use it as a WebGL package
+change the import slightly
+
+```typescript
+import triangle from "a-big-triangle";
+import createShader from "gl-shader";
+import { options, start, draw, getCanvas, setup } from "canvas-recorder/gl";
+
+let shader;
+
+options( {
+    frames: 10,
+    size: [ 100, 100 ]
+} );
+
+setup( ( gl: WebGLRenderingContext ) => {
+    shader = createShader(
+        gl,
+        `
+            precision mediump float;
+            attribute vec2 position;
+
+            varying vec2 uv;
+
+            void main() {
+                uv = position.xy;
+                gl_Position = vec4( position.xy, 0.0, 1.0 );
+            }
+        `,
+        `
+            precision mediump float;
+            varying vec2 uv;
+            void main() {
+                gl_FragColor = vec4( 1, 0, 0, 1 );
+            }
+        `,
+    );
+} );
+
+draw( ( gl: WebGLRenderingContext ) => {
+
+    shader.bind();
+
+    triangle( gl );
+} );
+
+start();
+```
+
+### Context
+In this implementation, the context is always a `WebGLRenderingContext` instead of a `CanvasRenderingContext2D`.
