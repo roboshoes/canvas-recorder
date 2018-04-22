@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import { assign, bindAll, memoize, padStart } from "lodash";
+import { saveAs } from "file-saver";
 
 /**
  * Complete set of options.

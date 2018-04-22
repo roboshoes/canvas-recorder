@@ -1,6 +1,8 @@
-dist/tests
+dist
 tsconfig.json
 src
 tests
 karma.conf.json
 .gitignore
+LICENSE
+tslint.json

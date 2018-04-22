@@ -1,13 +1,15 @@
 {
   "name": "canvas-recorder",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Browserside tool to record canvas animations frame by frame.",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "types": "./",
+  "main": "./",
   "scripts": {
     "build": "tsc --p tsconfig.json",
     "test-files": "npm run build && browserify dist/tests/tests.js > dist/tests/bundle.js",
-    "test": "npm run test-files && karma start karma.conf.js"
+    "test": "npm run test-files && karma start karma.conf.js",
+    "push": "npm run build && cp ./dist/src/* ./ && npm publish && npm run clean",
+    "clean": "rm gl.d.ts gl.js index.d.ts index.js shared.d.ts shared.js"
   },
   "keywords": [
     "animation",
