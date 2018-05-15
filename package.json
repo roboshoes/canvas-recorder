@@ -11,6 +11,10 @@
     "push": "npm run build && cp ./dist/src/* ./ && npm publish && npm run clean",
     "clean": "rm gl.d.ts gl.js index.d.ts index.js shared.d.ts shared.js"
   },
+  "bin": {
+    "canvas-recorder": "bin/index.js",
+    "ffmpey": "bin/index.js"
+  },
   "keywords": [
     "animation",
     "canvas",
@@ -21,6 +25,7 @@
   "author": "Mathias Paumgarten",
   "license": "MIT",
   "dependencies": {
+    "commander": "^2.15.1",
     "file-saver": "^1.3.8",
     "jszip": "^3.1.5",
     "lodash": "^4.17.5"
@@ -35,7 +40,7 @@
     "browserify": "^16.1.1",
     "expect.js": "^0.3.1",
     "gl-shader": "^4.2.1",
-    "karma": "^2.0.0",
+    "karma": "^2.0.2",
     "karma-chrome-launcher": "^2.2.0",
     "karma-cli": "^1.0.1",
     "karma-expect": "^1.1.3",
