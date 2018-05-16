@@ -2,7 +2,7 @@ dist
 tsconfig.json
 src
 tests
-karma.conf.json
+karma.conf.js
 .gitignore
 LICENSE
 tslint.json

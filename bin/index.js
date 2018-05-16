@@ -36,6 +36,6 @@ exec( "ffmpeg -version", function( error, stdout, stderr ) {
     ], {
         stdio: "inherit",
         shell: true,
-        cwd: path.join( process.cwd(), ...input.split( "/" ) ),
+        cwd: input,
     } );
 } );

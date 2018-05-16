@@ -25,6 +25,11 @@ document.body.appendChild( getCanvas() );
 start();
 ```
 
+Additionally, `canvas-recorder` can also be used as a command line tool to merge the image sequence into
+a MP4 file format.
+
+[See here](#cli-tool)
+
 ## Methods
 
 ### `options( settings: {} )`
@@ -131,3 +136,30 @@ start();
 
 ### Context
 In this implementation, the context is always a `WebGLRenderingContext` instead of a `CanvasRenderingContext2D`.
+
+
+## Cli Tool
+
+Tool to turn the image sequence into a movei format.
+
+When installed globally, or through the use of a package.json, one can invoke the command `canvas-recorder` or
+alternatively use the alias `ffmpy` (pronounced: _effeffempey_) as a shorter command.
+
+Unsurprisingly uses FFmpeg under the hood. It has a limited amount of possible options but sets defaults for all
+of them. Therefore the easiest usecase is calling the command in the directory of the image sequence with not flags
+
+### Flags
+- `-i, --input <dir>` Path to the folder of the image sequence. Defaults to `.`.
+- `-r, --fps <num>` Framerate used in the movie file. Defaults to `30`.
+- `-o, --output <name>` File name of the output. Defaults to `out.mp4`.
+
+
+### Setup
+When installed globally, the commands are available everywhere. Alternatively, when installed locally in
+the project it can still be executed from the package.json
+
+```json
+"scripts": {
+    "merge": "canvas-recorder -i ./image-sequence/ -o film.mp4"
+}
+```
