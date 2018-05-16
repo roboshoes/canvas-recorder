@@ -103,7 +103,7 @@ export function specs() {
 
             it( "should create a red frame", ( done: MochaDone ) => {
 
-                let shader: { bind: () => void };
+                let shader: ReturnType<typeof createShader>;
 
                 options( {
                     frames: 1,

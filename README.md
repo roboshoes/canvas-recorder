@@ -26,9 +26,9 @@ start();
 ```
 
 Additionally, `canvas-recorder` can also be used as a command line tool to merge the image sequence into
-a MP4 file format.
+a MP4 file format. [See here](#cli-tool)
 
-[See here](#cli-tool)
+_Note: The package is written in Typescript and ships with types. Use in JS or TS alike._
 
 ## Methods
 
@@ -48,7 +48,7 @@ It takes one argument which is an object with the following possible settings:
 - `onComplete`: [Default `<internal>`] Function that is called when all frames are recorded and archived into a zip in
                                        form of a `Blob`. When not set, a download is triggered automatically.
 - `color`: [Default: `"white"`] Sets the background color of every frame if `clear` is set to `true`.
-- `fps`: [Default: `60`] The framerate at from which the elapsed time is calculated in record mode. Not that the
+- `fps`: [Default: `60`] The framerate from which the elapsed time is calculated in record mode. Note that the
                          recording won't happen in at this pace as it is no longer realtime.
 
 ### `draw( ( context, time ) => {} )`
@@ -82,6 +82,26 @@ Returns the canvas being used by the recorder.
 
 ### `getContext(): CanvasRenderingContext2D`
 Returns the context attached to the canvas of the recorder.
+
+### `Recorder`
+All methods are simply a shorthand for an instance of a `Recorder`. If one would rather instantiate the recorder
+themselves, maybe to run multiple recorders at once, do it like so:
+
+```ts
+import { Recorder } from "canvas-recorder";
+
+const recorder = new Recorder();
+
+recorder.options( {
+    ...
+} );
+
+recorder.draw( ( context: CanvasRenderingContext2D, time: number ) => {
+    ...
+} );
+
+recorder.start();
+```
 
 ## WebGL
 
