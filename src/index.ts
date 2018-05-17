@@ -16,6 +16,11 @@ export class Recorder extends BaseRecorder<CanvasRenderingContext2D> {
         this.context.fillStyle = this.settings.color;
         this.context.fillRect( 0, 0, this.settings.size[ 0 ], this.settings.size[ 1 ] );
     }
+
+    protected updateCanvas( canvas: HTMLCanvasElement ) {
+        this.canvas = canvas;
+        this.context = canvas.getContext( "2d" )!;
+    }
 }
 
 

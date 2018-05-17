@@ -23,6 +23,17 @@ export function specs() {
                 reset();
             } );
 
+            it( "should set canvas to correct size", () => {
+                options( {
+                    size: [ 300, 500 ],
+                } );
+
+                const canvas = getCanvas();
+
+                expect( canvas.width ).to.be( 300 );
+                expect( canvas.height ).to.be( 500 );
+            } );
+
             it( "should call draw 3 times", ( done: MochaDone ) => {
                 let count = 0;
 
@@ -56,7 +67,7 @@ export function specs() {
                 stop();
             } );
 
-            it ( "should fix delta time when recording", ( done: MochaDone ) => {
+            it( "should fix delta time when recording", ( done: MochaDone ) => {
                 options( {
                     fps: 10,
                     onComplete: () => {},
@@ -74,6 +85,34 @@ export function specs() {
                 } );
 
                 start();
+            } );
+
+            it( "should set a given canvas", ( done: MochaDone ) => {
+                const canvas = document.createElement( "canvas" );
+                const context = canvas.getContext( "webgl" )! || canvas.getContext( "experimental-webgl" )!;
+
+                expect( getCanvas() ).not.to.be( canvas );
+
+                options( {
+                    record: false,
+                    size: [ 30, 40 ],
+                    canvas,
+                } );
+
+                expect( getCanvas() ).to.be( canvas );
+                expect( getContext() ).to.be( context );
+
+                draw( ( c: WebGLRenderingContext ) => {
+                    expect( c ).to.be( context );
+
+                    done();
+                    stop();
+                } );
+
+                start();
+
+                expect( canvas.width ).to.be( 30 );
+                expect( canvas.height ).to.be( 40 );
             } );
 
         } );

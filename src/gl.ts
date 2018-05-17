@@ -25,6 +25,11 @@ export class Recorder extends BaseRecorder<WebGLRenderingContext> {
     protected clear() {
         this.gl.clear( this.gl.COLOR_BUFFER_BIT );
     }
+
+    protected updateCanvas( canvas: HTMLCanvasElement ) {
+        this.canvas = canvas;
+        this.context = ( canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" ) )!;
+    }
 }
 
 export const recorder = new Recorder();

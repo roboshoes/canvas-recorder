@@ -151,7 +151,7 @@ export function specs() {
                 stop();
             } );
 
-            it ( "should fix delta time when recording", ( done: MochaDone ) => {
+            it( "should fix delta time when recording", ( done: MochaDone ) => {
                 options( {
                     fps: 10,
                     onComplete: () => {},
@@ -169,6 +169,34 @@ export function specs() {
                 } );
 
                 start();
+            } );
+
+            it( "should set a given canvas", ( done: MochaDone ) => {
+                const canvas = document.createElement( "canvas" );
+                const context = canvas.getContext( "2d" )!;
+
+                expect( getCanvas() ).not.to.be( canvas );
+
+                options( {
+                    record: false,
+                    size: [ 30, 40 ],
+                    canvas,
+                } );
+
+                expect( getCanvas() ).to.be( canvas );
+                expect( getContext() ).to.be( context );
+
+                draw( ( c: CanvasRenderingContext2D ) => {
+                    expect( c ).to.be( context );
+
+                    done();
+                    stop();
+                } );
+
+                start();
+
+                expect( canvas.width ).to.be( 30 );
+                expect( canvas.height ).to.be( 40 );
             } );
 
         } );

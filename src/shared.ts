@@ -1,6 +1,6 @@
+import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { assign, bindAll, memoize, padStart } from "lodash";
-import { saveAs } from "file-saver";
 
 /**
  * Complete set of options.
@@ -13,6 +13,7 @@ export interface Settings {
     onComplete: (blob: Blob) => void;
     color: string;
     fps: number;
+    canvas?: HTMLCanvasElement;
 }
 
 /**
@@ -58,6 +59,10 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
     public options( opts: DrawOptions ) {
         if ( this.isLooping ) {
             throw new Error( "Options can not be set while animation is in progress." );
+        }
+
+        if (opts.canvas) {
+            this.updateCanvas(opts.canvas);
         }
 
         assign( this.settings, opts );
@@ -164,6 +169,8 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
     }
 
     protected abstract clear(): void;
+
+    protected abstract updateCanvas( canvas: HTMLCanvasElement ): void;
 
     private init() {
         this.canvas.width = this.settings.size[ 0 ];
