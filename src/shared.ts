@@ -168,6 +168,15 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
         return this.context;
     }
 
+    /**
+     * Shorthand to both insert the canvas into the DOM as the last element of the body as
+     * well as calling `start()`. Useful for short demos that require no further setup.
+     */
+    public bootstrap() {
+        document.body.appendChild( this.getCanvas() );
+        this.start();
+    }
+
     protected abstract clear(): void;
 
     protected abstract updateCanvas( canvas: HTMLCanvasElement ): void;

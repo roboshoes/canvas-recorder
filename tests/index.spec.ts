@@ -1,6 +1,6 @@
 import JSZip from "jszip";
 
-import { cleanup, draw, getCanvas, getContext, options, Recorder, reset, start, stop } from "../src";
+import { bootstrap, cleanup, draw, getCanvas, getContext, options, Recorder, reset, start, stop } from "../src";
 import { base64ToImage } from "./helpers";
 
 export function specs() {
@@ -199,6 +199,33 @@ export function specs() {
                 expect( canvas.height ).to.be( 40 );
             } );
 
+        } );
+
+        describe( "bootstrap", () => {
+            beforeEach( () => {
+                reset();
+
+                options( {
+                    record: false,
+                } );
+            } );
+
+            it( "should add canvas to DOM", ( done: MochaDone ) => {
+
+                document.body.appendChild = <T extends Node>( child: T ): T => {
+                    expect( child ).to.be( getCanvas() );
+
+                    return child;
+                };
+
+                draw( ( context: CanvasRenderingContext2D ) => {
+                    expect( context ).to.be( getContext() );
+                    stop();
+                    done();
+                } );
+
+                bootstrap();
+            } );
         } );
 
         describe( "zip", () => {

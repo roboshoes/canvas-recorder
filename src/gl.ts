@@ -34,7 +34,18 @@ export class Recorder extends BaseRecorder<WebGLRenderingContext> {
 
 export const recorder = new Recorder();
 
-bindAll( recorder, [ "getCanvas", "getContext", "options", "start", "stop", "cleanup", "reset", "draw", "setup" ] );
+bindAll( recorder, [
+    "getCanvas",
+    "getContext",
+    "options",
+    "start",
+    "stop",
+    "cleanup",
+    "reset",
+    "draw",
+    "setup",
+    "bootstrap",
+] );
 
 const getCanvas = recorder.getCanvas;
 const getContext = recorder.getContext;
@@ -45,6 +56,7 @@ const cleanup = recorder.cleanup;
 const reset = recorder.reset;
 const draw = recorder.draw;
 const setup = recorder.setup;
+const bootstrap = recorder.bootstrap;
 
 export default recorder;
-export { getCanvas, getContext, options, start, stop, cleanup, reset, draw, setup };
+export { getCanvas, getContext, options, start, stop, cleanup, reset, draw, setup, bootstrap };

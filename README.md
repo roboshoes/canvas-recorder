@@ -85,6 +85,10 @@ Returns the canvas being used by the recorder.
 ### `getContext(): CanvasRenderingContext2D`
 Returns the context attached to the canvas of the recorder.
 
+### `bootstrap()`
+Shorthand for inserting the canvas into the DOM as well as calling `start()`. This is particularly useful
+for short sketches.
+
 ### `Recorder`
 All methods are simply a shorthand for an instance of a `Recorder`. If one would rather instantiate the recorder
 themselves, maybe to run multiple recorders at once, do it like so:

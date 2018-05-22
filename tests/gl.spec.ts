@@ -2,7 +2,7 @@ import triangle from "a-big-triangle";
 import createShader from "gl-shader";
 import JSZip from "jszip";
 
-import { cleanup, draw, getCanvas, getContext, options, reset, setup, start, stop } from "../src/gl";
+import { bootstrap, cleanup, draw, getCanvas, getContext, options, reset, setup, start, stop } from "../src/gl";
 import { base64ToImage, imageToCanvas } from "./helpers";
 
 export function specs() {
@@ -115,6 +115,33 @@ export function specs() {
                 expect( canvas.height ).to.be( 40 );
             } );
 
+        } );
+
+        describe( "bootstrap", () => {
+            beforeEach( () => {
+                reset();
+
+                options( {
+                    record: false,
+                } );
+            } );
+
+            it( "should add canvas to DOM", ( done: MochaDone ) => {
+
+                document.body.appendChild = <T extends Node>( child: T ): T => {
+                    expect( child ).to.be( getCanvas() );
+
+                    return child;
+                };
+
+                draw( ( context: WebGLRenderingContext ) => {
+                    expect( context ).to.be( getContext() );
+                    stop();
+                    done();
+                } );
+
+                bootstrap();
+            } );
         } );
 
         describe( "zip", () => {
