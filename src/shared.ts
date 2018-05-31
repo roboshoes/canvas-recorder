@@ -17,7 +17,7 @@ export interface Settings {
 }
 
 /**
- * Interface to descrbie the possible when set in an `options()` call.
+ * Interface to descrive the possible settings when set in an `options()` call.
  */
 export type DrawOptions = Partial<Settings>;
 
@@ -61,8 +61,8 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
             throw new Error( "Options can not be set while animation is in progress." );
         }
 
-        if (opts.canvas) {
-            this.updateCanvas(opts.canvas);
+        if ( opts.canvas ) {
+            this.updateCanvas( opts.canvas );
         }
 
         assign( this.settings, opts );
