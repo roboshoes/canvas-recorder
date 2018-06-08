@@ -1,6 +1,6 @@
 {
   "name": "canvas-recorder",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Browserside tool to record canvas animations frame by frame.",
   "types": "./",
   "main": "./",

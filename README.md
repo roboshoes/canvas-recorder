@@ -109,6 +109,35 @@ recorder.draw( ( context: CanvasRenderingContext2D, time: number ) => {
 recorder.start();
 ```
 
+### `addFrame( canvas: HTMLCanvasElement ): Promise`
+In order to use the frame packaging without any of the utility methods listed above, one can use `addFrame` and the
+following methods to aggregate all frames manually. This me adds an PNG of the current frame to the bundle.
+One can add as many frames as one likes. Use the following methods to retrive the ZIP or download it.
+
+### `getBundle(): JSZip`
+Returns the current bundle as a zip containing all frames. See [JSZip Documentation](https://stuk.github.io/jszip/)
+for how to use it.
+
+### `downloadBundle(): Promise`
+Downloads the current set of frames and resets the bundle. This is useful if you want to download lots of frames
+and don't want the zip to get too large. After calling download the next call to `addFrame` will be in a new bundle.
+
+
+The following example shows how to use it without all helper methods.
+
+```typescript
+import { addFrame, downloadBundle } from "canvas-recorder";
+
+// ... canvas setup
+
+context.fillStyle = "green";
+context.fillRect( 10, 14, 200, 300 );
+
+addFrame( canvas ).then( () => {
+    downloadBundle();
+} );
+```
+
 ## WebGL
 
 The package is also avialble with webgl support. The API is quasi identical. In order to use it as a WebGL package

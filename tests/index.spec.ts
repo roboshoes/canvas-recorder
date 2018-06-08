@@ -1,6 +1,21 @@
 import JSZip from "jszip";
 
-import { bootstrap, cleanup, draw, getCanvas, getContext, options, Recorder, reset, start, stop } from "../src";
+import {
+    addFrame,
+    bootstrap,
+    cleanup,
+    downloadBundle,
+    draw,
+    getBundle,
+    getCanvas,
+    getContext,
+    options,
+    Recorder,
+    reset,
+    resetBundle,
+    start,
+    stop,
+} from "../src";
 import { base64ToImage } from "./helpers";
 
 export function specs() {
@@ -445,5 +460,68 @@ export function specs() {
 
         } );
 
+        describe( "shorthand", () => {
+            let canvas: HTMLCanvasElement;
+            let context: CanvasRenderingContext2D;
+
+            beforeEach( () => {
+                canvas = document.createElement( "canvas" );
+                context = canvas.getContext( "2d" )!;
+
+                canvas.width = 100;
+                canvas.height = 100;
+
+                resetBundle();
+            } );
+
+            it( "should push multiple frames", ( done: MochaDone ) => {
+                context.fillStyle = "red";
+                context.fillRect( 0, 0, 100, 100 );
+
+                addFrame( canvas )
+                    .then( () => {
+                        context.fillStyle = "green";
+                        context.fillRect( 0, 0, 100, 100 );
+
+                        return addFrame( canvas );
+                    } )
+                    .then( () => {
+                        let count = 0;
+
+                        getBundle().forEach( () => count++ );
+
+                        expect( count ).to.be( 2 );
+                        done();
+                    } );
+            } );
+
+            it( "should reset the bundle", ( done: MochaDone ) => {
+                context.fillStyle = "red";
+                context.fillRect( 0, 0, 100, 100 );
+
+                addFrame( canvas )
+                    .then( () => {
+                        context.fillStyle = "green";
+                        context.fillRect( 0, 0, 100, 100 );
+
+                        return addFrame( canvas );
+                    } )
+                    .then( () => {
+                        return downloadBundle();
+                    } )
+                    .then( () => addFrame( canvas ) )
+                    .then( () => {
+                        let count = 0;
+
+                        getBundle().forEach( ( path: string ) => {
+                            expect( path ).to.be( "000000.png" );
+                            count++;
+                        } );
+
+                        expect( count ).to.be( 1 );
+                        done();
+                    } );
+            } );
+        } );
     } );
 }
