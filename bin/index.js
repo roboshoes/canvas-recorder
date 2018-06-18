@@ -12,6 +12,42 @@ program
     .option( "-k, --format <format>", "The file format generated: mp4 or gif. Default is mp4" )
     .parse( process.argv );
 
+function valueOrDefault( name, defaultValue, restrictions ) {
+    const value = program[ name ];
+
+    if ( !value ) {
+        return defaultValue;
+    }
+
+    if ( restrictions && restrictions.indexOf( value ) < 0 ) {
+        throw new Error( name + ' has to be one of: ' + restrictions.join ( ', ' ) );
+    }
+
+    return value;
+}
+
+function getCommand( options ) {
+    switch ( options.format ) {
+        case "mp4":
+            return [
+                "-i %06d.png",
+                `-framerate ${ options.fps }`,
+                `-r ${ options.fps }`,
+                "-c:v libx264",
+                `-vf "fps=${ options.fps },format=yuv420p"`,
+                output,
+            ];
+        case "gif":
+            return [
+                "-f image2",
+                `-framerate ${ options.fps }`,
+                "-i %06d.png",
+                options.output,
+            ];
+        default:
+            return [];
+    }
+}
 
 exec( "ffmpeg -version", function( error, stdout, stderr ) {
     if ( error || stderr ) {
@@ -23,43 +59,31 @@ exec( "ffmpeg -version", function( error, stdout, stderr ) {
         return;
     }
 
-    const format = program.format || "mp4";
-    const fps = program.fps || 30;
-    const output = program.output || ( "out." + format );
-    const input = program.input || ".";
+    const options = {};
 
-    if ( [ "mp4", "gif" ].indexOf( format ) < 0 ) {
-        console.warn( "Unrecognized format. Supported formats are 'gif' and 'mp4'" );
+    try {
+        options.format = valueOrDefault( "format", "mp4", [ "mp4", "gif" ] );
+        options.fps = valueOrDefault( "fps", 30 );
+        options.output = valueOrDefault( "output", "out." + options.format );
+        options.input = valueOrDefault( "input", "." );
+
+    } catch( error ) {
+        console.error( error.message );
         return;
     }
 
-    switch ( format ) {
-        case "mp4":
-            spawn( "ffmpeg", [
-                "-i %06d.png",
-                `-framerate ${ fps }`,
-                `-r ${ fps }`,
-                "-c:v libx264",
-                `-vf "fps=${ fps },format=yuv420p"`,
-                output,
-            ], {
-                stdio: "inherit",
-                shell: true,
-                cwd: input,
-            } );
-            break;
-        case "gif":
-            spawn( "ffmpeg", [
-                "-f image2",
-                `-framerate ${ fps }`,
-                "-i %06d.png",
-                output,
-            ], {
-                stdio: "inherit",
-                shell: true,
-                cwd: input,
-            } );
-            break;
+    const spawnOptions = {
+        stdio: "inherit",
+        shell: true,
+        cwd: options.input,
     }
 
+    const spawnFlags = getCommand( options );
+
+    if ( !spawnFlags ) {
+        console.error( "Something went wrong. canvas-recorder didn't understand the command." );
+        return;
+    }
+
+    spawn( "ffmpeg", spawnFlags, spawnOptions );
 } );
