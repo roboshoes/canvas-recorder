@@ -248,11 +248,11 @@ export function colorToRGBA( color: string ): [ number, number, number, number ]
     return strictColorToRGBA( color ) as [ number, number, number, number ];
 }
 
-function download( blob: Blob ) {
+export function download( blob: Blob ) {
     saveAs( blob, "frames.zip" );
 }
 
-function record( canvas: HTMLCanvasElement, frame: number, zip: JSZip ): Promise<void> {
+export function record( canvas: HTMLCanvasElement, frame: number, zip: JSZip ): Promise<void> {
     return new Promise<void>( resolve => {
         canvas.toBlob( ( blob: Blob | null ) => {
 
