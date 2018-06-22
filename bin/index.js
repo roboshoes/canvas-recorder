@@ -30,18 +30,18 @@ function getCommand( options ) {
     switch ( options.format ) {
         case "mp4":
             return [
-                "-i %06d.png",
                 `-framerate ${ options.fps }`,
-                `-r ${ options.fps }`,
+                "-i %06d.png",
                 "-c:v libx264",
-                `-vf "fps=${ options.fps },format=yuv420p"`,
-                output,
+                "-pix_fmt yuv420p",
+                options.output,
             ];
         case "gif":
             return [
                 "-f image2",
                 `-framerate ${ options.fps }`,
                 "-i %06d.png",
+                `-r ${ options.fps }`,
                 options.output,
             ];
         default:
