@@ -62,7 +62,18 @@ export function downloadBundle(): Promise<void> {
 // For ease of use we make a bound version of the recorder available.
 const recorder = new Recorder();
 
-bindAll( recorder, [ "getCanvas", "getContext", "options", "start", "stop", "cleanup", "reset", "draw", "bootstrap" ] );
+bindAll( recorder, [
+    "getCanvas",
+    "getContext",
+    "options",
+    "start",
+    "stop",
+    "cleanup",
+    "reset",
+    "draw",
+    "bootstrap",
+    "setup",
+] );
 
 const getCanvas = recorder.getCanvas;
 const getContext = recorder.getContext;
@@ -73,6 +84,7 @@ const cleanup = recorder.cleanup;
 const reset = recorder.reset;
 const draw = recorder.draw;
 const bootstrap = recorder.bootstrap;
+const setup = recorder.setup;
 
 export default recorder;
-export { getCanvas, getContext, options, start, stop, cleanup, reset, draw, bootstrap };
+export { getCanvas, getContext, options, start, stop, cleanup, reset, draw, bootstrap, setup };
