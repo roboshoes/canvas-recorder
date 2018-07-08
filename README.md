@@ -1,6 +1,6 @@
 # Canvas Recorder
 
-> A blatant ripoff of [Looper](https://github.com/spite/looper)
+> A blatant ripoff of [Looper](https://github.com/spite/looper) 😎
 
 This is a small utility to record a canvas based animation of any sort. The tool can be used to
 run the animation in the browser until one is ready to record it. The setup works around four
