@@ -1,9 +1,13 @@
 {
   "name": "canvas-recorder",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Browserside tool to record canvas animations frame by frame.",
   "types": "./",
   "main": "./",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MathiasPaumgarten/canvas-recorder"
+  },
   "scripts": {
     "build": "tsc --p tsconfig.json",
     "test-files": "npm run build && browserify dist/tests/tests.js > dist/tests/bundle.js",
