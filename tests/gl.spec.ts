@@ -117,6 +117,49 @@ export function specs() {
 
         } );
 
+        describe( "draw", () => {
+            let count: number;
+
+            beforeEach( () => {
+                count = 0;
+                reset();
+            } );
+
+            it( "should pass the t state", ( done: MochaDone ) => {
+                options( {
+                    frames: 10,
+                    record: false,
+                } );
+
+                draw( ( _0, _1, t: number ) => {
+                    expect( t ).to.be( count / 10 );
+                    count++;
+                } );
+
+                cleanup( done );
+
+                start();
+            } );
+
+            it( "should pass -1 as t state", ( done: MochaDone ) => {
+                options( {
+                    record: false,
+                } );
+
+                draw( ( _0, _1, t: number ) => {
+                    expect( t ).to.be( -1 );
+
+                    if ( ++count > 10 ) {
+                        stop();
+                    }
+                } );
+
+                cleanup( done );
+
+                start();
+            } );
+        } );
+
         describe( "bootstrap", () => {
             beforeEach( () => {
                 reset();

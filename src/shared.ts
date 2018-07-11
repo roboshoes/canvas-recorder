@@ -25,7 +25,7 @@ export type DrawOptions = Partial<Settings>;
  * Abstract base class that implements shared internal functionality to record a canvas was animation frame by frame.
  */
 export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingContext> {
-    protected callback?: ( context: T, time: number ) => void;
+    protected callback?: ( context: T, time: number, percent: number ) => void;
     protected teardown?: () => void;
     protected before?: ( context: T ) => void;
     protected count = 0;
@@ -137,7 +137,7 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
      *
      * @param action callback to capture the animation.
      */
-    public draw( action: ( context: T, time: number ) => void ) {
+    public draw( action: ( context: T, time: number, t: number ) => void ) {
         this.callback = action;
     }
 
@@ -198,11 +198,15 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
             this.count * ( 1000 / this.settings.fps ) :
             Date.now() - this.startTime;
 
+        const t = this.settings.frames > 0 ?
+            ( this.count / this.settings.frames ) % 1 :
+            -1;
+
         if ( this.settings.clear ) {
             this.clear();
         }
 
-        this.callback!( this.context, delta );
+        this.callback!( this.context, delta, t );
         this.count++;
 
         if ( this.settings.record ) {
