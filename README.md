@@ -1,5 +1,7 @@
 # Canvas Recorder
 
+[![Build Status](https://travis-ci.org/MathiasPaumgarten/canvas-recorder.svg?branch=master)](https://travis-ci.org/MathiasPaumgarten/canvas-recorder)
+
 > A blatant ripoff of [Looper](https://github.com/spite/looper) 😎
 
 This is a small utility to record a canvas based animation of any sort. The tool can be used to
