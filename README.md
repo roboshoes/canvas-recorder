@@ -41,7 +41,7 @@ _Note: The package is written in Typescript and ships with types. Use in JS or T
   * [`cleanup( () => {} )`](#cleanup------------)
   * [`getCanvas(): HTMLCanvasElement`](#getcanvas----htmlcanvaselement)
   * [`getContext(): CanvasRenderingContext2D`](#getcontext----canvasrenderingcontext2d)
-  * [`bootstrap()`](#bootstrap--)
+  * [`bootstrap( options?: {} )`](#bootstrap--)
   * [`Recorder`](#recorder)
   * [`addFrame( canvas: HTMLCanvasElement ): Promise`](#addframe--canvas--htmlcanvaselement----promise)
   * [`getBundle(): JSZip`](#getbundle----jszip)
@@ -108,9 +108,14 @@ Returns the canvas being used by the recorder.
 ### `getContext(): CanvasRenderingContext2D`
 Returns the context attached to the canvas of the recorder.
 
-### `bootstrap()`
+### `bootstrap( options? )`
 Shorthand for inserting the canvas into the DOM as well as calling `start()`. This is particularly useful
 for short sketches.
+
+Bootstrapping allows an options paramter. An object that has a single flag `clear`. Calling
+`boostrap( { clear: true } )` will terminate previous sketch and remove the previous canvas from
+the DOM. This is helpful when one has an auto-reload with a undefined loop. By default `bootstrap()`
+does not clear.
 
 ### `Recorder`
 All methods are simply a shorthand for an instance of a `Recorder`. If one would rather instantiate the recorder

@@ -270,19 +270,27 @@ export function specs() {
 
             it( "should add canvas to DOM", ( done: MochaDone ) => {
 
-                document.body.appendChild = <T extends Node>( child: T ): T => {
-                    expect( child ).to.be( getCanvas() );
-
-                    return child;
-                };
-
                 draw( ( context: CanvasRenderingContext2D ) => {
                     expect( context ).to.be( getContext() );
                     stop();
                     done();
                 } );
 
+                document.body.innerHTML = "";
                 bootstrap();
+                expect( document.body.children[ 0 ] ).to.be( getCanvas() );
+            } );
+
+            it( "should not throw an error and clear previous call", () => {
+                draw(() => {});
+
+                document.body.innerHTML = "";
+                bootstrap();
+
+                expect( document.body.children.length ).to.be( 1 );
+
+                expect(() => bootstrap( { clear: true } ) ).not.to.throwError();
+                expect( document.body.children.length ).to.be( 1 );
             } );
         } );
 

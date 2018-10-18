@@ -22,6 +22,13 @@ export interface Settings {
 export type DrawOptions = Partial<Settings>;
 
 /**
+ * Possible options to be sent to bootstrapping a sketch.
+ */
+export interface BoostrapOptions {
+    clear: boolean;
+}
+
+/**
  * Abstract base class that implements shared internal functionality to record a canvas was animation frame by frame.
  */
 export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRenderingContext> {
@@ -172,7 +179,12 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
      * Shorthand to both insert the canvas into the DOM as the last element of the body as
      * well as calling `start()`. Useful for short demos that require no further setup.
      */
-    public bootstrap() {
+    public bootstrap( options: BoostrapOptions = { clear: false } ) {
+        if ( options.clear ) {
+            this.stop();
+            document.body.innerHTML = "";
+        }
+
         document.body.appendChild( this.getCanvas() );
         this.start();
     }
