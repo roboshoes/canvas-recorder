@@ -32,7 +32,7 @@
     "commander": "^2.16.0",
     "file-saver": "^1.3.8",
     "jszip": "^3.1.5",
-    "lodash": "^4.17.10"
+    "lodash": "^4.17.11"
   },
   "devDependencies": {
     "@types/a-big-triangle": "^1.0.0",
@@ -43,7 +43,7 @@
     "@types/lodash": "^4.14.108",
     "@types/mocha": "^5.2.0",
     "a-big-triangle": "^1.0.3",
-    "browserify": "^16.2.2",
+    "browserify": "^16.2.3",
     "expect.js": "^0.3.1",
     "gl-shader": "^4.2.1",
     "karma": "^2.0.4",
