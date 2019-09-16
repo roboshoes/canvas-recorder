@@ -1,3 +1,4 @@
+import JSZip from "jszip";
 import { bindAll } from "lodash";
 
 import { BaseRecorder, colorToRGBA, Settings } from "./shared";
@@ -10,7 +11,10 @@ export class Recorder extends BaseRecorder<WebGLRenderingContext> {
 
     constructor() {
         const canvas = document.createElement( "canvas" );
-        const context = ( canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" ) )!;
+        const context: WebGLRenderingContext = (
+            canvas.getContext( "webgl" ) ||
+            canvas.getContext( "experimental-webgl" )
+        )! as WebGLRenderingContext;
 
         super( canvas, context );
     }
@@ -28,7 +32,10 @@ export class Recorder extends BaseRecorder<WebGLRenderingContext> {
 
     protected updateCanvas( canvas: HTMLCanvasElement ) {
         this.canvas = canvas;
-        this.context = ( canvas.getContext( "webgl" ) || canvas.getContext( "experimental-webgl" ) )!;
+        this.context = (
+            canvas.getContext( "webgl" ) ||
+            canvas.getContext( "experimental-webgl" )
+        )! as WebGLRenderingContext;
     }
 }
 
@@ -45,6 +52,10 @@ bindAll( recorder, [
     "draw",
     "setup",
     "bootstrap",
+    "addFrame",
+    "resetBundle",
+    "downloadBundle",
+    "getBundle",
 ] );
 
 const getCanvas = recorder.getCanvas;
@@ -57,6 +68,26 @@ const reset = recorder.reset;
 const draw = recorder.draw;
 const setup = recorder.setup;
 const bootstrap = recorder.bootstrap;
+const addFrame = recorder.addFrame;
+const resetBundle = recorder.resetBundle;
+const downloadBundle = recorder.downloadBundle;
+const getBundle = recorder.getBundle;
 
 export default recorder;
-export { getCanvas, getContext, options, start, stop, cleanup, reset, draw, setup, bootstrap };
+export {
+    getCanvas,
+    getContext,
+    options,
+    start,
+    stop,
+    cleanup,
+    reset,
+    draw,
+    setup,
+    bootstrap,
+    addFrame,
+    resetBundle,
+    downloadBundle,
+    getBundle,
+    JSZip,
+};

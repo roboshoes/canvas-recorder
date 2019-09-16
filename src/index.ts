@@ -1,9 +1,7 @@
 import JSZip from "jszip";
 import { bindAll } from "lodash";
 
-import { BaseRecorder, download, DrawOptions, record, Settings } from "./shared";
-
-export { Settings, DrawOptions };
+import { BaseRecorder, DrawOptions, Settings } from "./shared";
 
 export class Recorder extends BaseRecorder<CanvasRenderingContext2D> {
     constructor() {
@@ -24,41 +22,6 @@ export class Recorder extends BaseRecorder<CanvasRenderingContext2D> {
     }
 }
 
-/**
- * Bundle of utilities to use just the recording without any other featuers. This is usefaul
- * when working with a setup that is not compatible with the options/draw configuration of
- * canvas-recorder.
- */
-
-let bundle = new JSZip();
-let count = 0;
-
-export function addFrame( canvas: HTMLCanvasElement ): Promise<void> {
-    return record( canvas, count++, bundle );
-}
-
-export function getBundle(): JSZip {
-    return bundle;
-}
-
-export function resetBundle(): void {
-    bundle = new JSZip();
-    count = 0;
-}
-
-/**
- * Download the current bundle of frames. This will also reset the bundle to a new empty one.
- * All further frames will not be included but can be downloaded subsequently.
- */
-export function downloadBundle(): Promise<void> {
-    return bundle.generateAsync( { type: "blob" } )
-        .then( download )
-        .then( () => {
-            count = 0;
-            bundle = new JSZip();
-        } );
-}
-
 // For ease of use we make a bound version of the recorder available.
 const recorder = new Recorder();
 
@@ -73,6 +36,10 @@ bindAll( recorder, [
     "draw",
     "bootstrap",
     "setup",
+    "addFrame",
+    "resetBundle",
+    "downloadBundle",
+    "getBundle",
 ] );
 
 const getCanvas = recorder.getCanvas;
@@ -85,6 +52,28 @@ const reset = recorder.reset;
 const draw = recorder.draw;
 const bootstrap = recorder.bootstrap;
 const setup = recorder.setup;
+const addFrame = recorder.addFrame;
+const resetBundle = recorder.resetBundle;
+const downloadBundle = recorder.downloadBundle;
+const getBundle = recorder.getBundle;
 
 export default recorder;
-export { getCanvas, getContext, options, start, stop, cleanup, reset, draw, bootstrap, setup };
+export {
+    getCanvas,
+    getContext,
+    options,
+    start,
+    stop,
+    cleanup,
+    reset,
+    draw,
+    bootstrap,
+    setup,
+    addFrame,
+    resetBundle,
+    downloadBundle,
+    getBundle,
+    JSZip,
+    Settings,
+    DrawOptions,
+};

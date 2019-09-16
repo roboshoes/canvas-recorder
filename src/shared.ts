@@ -39,7 +39,7 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
     protected startTime = 0;
     protected raf: number = 0;
     protected isLooping = false;
-    protected zip?: JSZip;
+    protected zip = new JSZip();
 
     /**
      * State of settings currently in use. For more detail please refer to the README.
@@ -187,6 +187,43 @@ export abstract class BaseRecorder<T extends CanvasRenderingContext2D | WebGLRen
 
         document.body.appendChild( this.getCanvas() );
         this.start();
+    }
+
+    /**
+     * Adds a single frame to the current bundle.
+     */
+    public addFrame( canvas: HTMLCanvasElement ): Promise<void> {
+        return record( canvas, this.count++, this.zip );
+    }
+
+    /**
+     * Returns a reference to the current collection of all frames in the form of a JSZip.
+     */
+    public getBundle(): JSZip {
+        return this.zip;
+    }
+
+    /**
+     * Empties all frames and resets the frame count to 0. Leaves all other settings in tact.
+     * For a more comprehensive reset use the `reset()` method as it reestablishes the default
+     * mode of the recorder.
+     */
+    public resetBundle() {
+        this.count = 0;
+        this.zip = new JSZip();
+    }
+
+    /**
+     * Download the current bundle of frames. This will also reset the bundle to a new empty one.
+     * All further frames will not be included but can be downloaded subsequently.
+     */
+    public downloadBundle(): Promise<void> {
+        return this.zip.generateAsync( { type: "blob" } )
+            .then( download )
+            .then( () => {
+                this.count = 0;
+                this.zip = new JSZip();
+            } );
     }
 
     protected abstract clear(): void;
